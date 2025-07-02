@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.db
+.env
+*.log
+
+# Virtual environments
+venv/
+.env/
+.envrc
+
+# Node/Frontend (for later)
+node_modules/
+dist/
+build/
+.next/
+.DS_Store
+
+# VSCode and system files
+.vscode/
+*.swp
