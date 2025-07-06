@@ -1,15 +1,15 @@
 # Python
-__pycache__/
+**/__pycache__/
 *.py[cod]
-*.sqlite3
-*.db
+**.sqlite3
+**.db
 .env
 *.log
 
 # Virtual environments
-venv/
+**/venv/
 .env/
-.envrc
+.envrc/
 
 # Node/Frontend (for later)
 node_modules/
@@ -21,3 +21,5 @@ build/
 # VSCode and system files
 .vscode/
 *.swp
+
+**/uploads/

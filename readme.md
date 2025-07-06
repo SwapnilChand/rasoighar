@@ -42,7 +42,7 @@ Built with **React** (frontend), **FastAPI** (backend), and **SQLite** (database
 
 - **Frontend:** ReactJS (with form inputs, filters, and card/grid views)
 - **Backend:** FastAPI (Python with Pydantic models)
-- **Database:** SQLite (easy setup) or PostgreSQL (for production)
+- **Database:** SQLite (for database)
 - **UI Library:** shadcn/ui (for beautiful, accessible components)
 
 ---
