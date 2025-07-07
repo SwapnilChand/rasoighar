@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import RecipeCard from "@/components/RecipeCard";
 import RecipeForm from "@/components/RecipeForm";
 import AddRecipeCard from "@/components/AddRecipeCard";
@@ -10,9 +11,28 @@ export default function Home() {
     ingredients: string[];
     steps: string;
     category: string;
+    image_url?: string;
+    is_tried?: number;
   };
 
   const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const fetchRecipes = async () => {
+    try {
+      const res = await axios.get("httpS://localhost:8000/recipes");
+      const data = res.data.map((r: any) => ({
+        ...r,
+        ingredients: r.ingredients.split(",").map((i: string) => i.trim()),
+      }));
+      setRecipes(data);
+    } catch (err) {
+      console.error("Error during fetching recipes", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchRecipes();
+  }, []);
+
   const handleAdd = (newRecipe: Recipe) => {
     setRecipes((prev) => [...prev, newRecipe]);
   };
