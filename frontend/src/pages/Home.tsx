@@ -13,20 +13,25 @@ export default function Home() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
 
   return (
-    <div className="max-w-4xl mx-auto p-4 space-y-6">
-      <h1 className="text-3xl font-bold">🍳 Recipe Manager</h1>
-
-      {/* Recipe Creation Form */}
-      <RecipeForm
-        onAdd={(newRecipe: any) => setRecipes([...recipes, newRecipe])}
-      />
-
-      {/* List of Recipes */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {recipes.map((recipe, idx) => (
-          <RecipeCard key={idx} recipe={recipe} />
-        ))}
+    <>
+      <div className="flex flex-col items-center space-y-6 px-4 pt-12">
+        <h1 className="text-2x1 font-bold">
+          <span role="img" aria-label="pan">
+            🍳
+          </span>{" "}
+          Rasoi Ghar
+        </h1>
+        <div className="w-full px-80">
+          <RecipeForm
+            onAdd={(newRecipe: any) => setRecipes([...recipes, newRecipe])}
+          />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {recipes.map((recipe, idx) => (
+            <RecipeCard key={idx} recipe={recipe} />
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

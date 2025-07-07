@@ -13,7 +13,7 @@ export default function RecipeForm({ onAdd }: Props) {
     e.preventDefault();
     if (!title.trim()) return;
 
-    const newRecipe = { title }; // Add more fields later
+    const newRecipe = { title };
     onAdd(newRecipe);
     setTitle("");
   };
