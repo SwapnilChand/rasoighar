@@ -1,6 +1,8 @@
-import RecipeForm from "@/components/RecipeForm";
-import RecipeCard from "@/components/RecipeCard";
 import { useState } from "react";
+import RecipeCard from "@/components/RecipeCard";
+import RecipeForm from "@/components/RecipeForm";
+import AddRecipeCard from "@/components/AddRecipeCard";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 export default function Home() {
   type Recipe = {
@@ -11,25 +13,41 @@ export default function Home() {
   };
 
   const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const handleAdd = (newRecipe: Recipe) => {
+    setRecipes((prev) => [...prev, newRecipe]);
+  };
 
   return (
     <>
-      <div className="flex flex-col items-center space-y-6 px-4 pt-12">
-        <h1 className="text-2x1 font-bold">
+      <div className="min-h-screen flex flex-col space-y-6 px-4 pt-12">
+        <h1 className="max-w-4xl text-xl font-bold mx-auto">
           <span role="img" aria-label="pan">
             🍳
           </span>{" "}
           Rasoi Ghar
         </h1>
-        <div className="w-full px-80">
-          <RecipeForm
-            onAdd={(newRecipe: any) => setRecipes([...recipes, newRecipe])}
-          />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        <input
+          type="text"
+          placeholder="Search recipes..."
+          className="w-full px-4 py-2 border rounded-md shadow-sm"
+        />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {recipes.map((recipe, idx) => (
             <RecipeCard key={idx} recipe={recipe} />
           ))}
+
+          <Dialog>
+            <DialogTrigger asChild>
+              <button>
+                <AddRecipeCard />
+              </button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <RecipeForm onAdd={handleAdd} />
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </>

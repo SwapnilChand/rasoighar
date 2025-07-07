@@ -25,7 +25,12 @@ export default function RecipeForm({ onAdd }: Props) {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
-      <Button type="submit">Add</Button>
+      <Button
+        type="submit"
+        className="hover:bg-grey-700 hover:text-grey-200 transition"
+      >
+        Add
+      </Button>
     </form>
   );
 }
