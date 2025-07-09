@@ -1,5 +1,5 @@
 # Python
-**/__pycache__/
+__pycache__/
 *.py[cod]
 **.sqlite3
 **.db
@@ -7,7 +7,7 @@
 *.log
 
 # Virtual environments
-**/venv/
+.venv/
 .env/
 .envrc/
 

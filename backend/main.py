@@ -3,15 +3,25 @@ from typing import Optional, List, Annotated
 from pydantic import BaseModel, StringConstraints, Field
 from fastapi import FastAPI, File, Form, UploadFile, HTTPException
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-# --- Pydantic Models ---
+# CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Pydantic Models
 class Recipe(BaseModel):
     title: Annotated[str, StringConstraints(min_length=1, strip_whitespace=True)]
     ingredients: Annotated[str, StringConstraints(min_length=1, strip_whitespace=True)]
     steps: Annotated[str, StringConstraints(min_length=1, strip_whitespace=True)]
-    category: Annotated[str, StringConstraints(min_length=1, strip_whitespace=True)]
+    category: Annotated[List[str], StringConstraints(min_length=1, strip_whitespace=True)]
     image_url: Optional[str] = None
     is_tried: Annotated[int, Field(ge=0, le=1)] = 0
 
@@ -23,7 +33,7 @@ class MessageResponse(BaseModel):
     msg: str
     image_url: Optional[str] = None
 
-# --- Utility Function ---
+# Utility Function
 db = "recipes.db"
 
 def get_db_connection():
@@ -31,7 +41,7 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-# --- Endpoints ---
+# Endpoints
 
 @app.get("/recipes/{id}", response_model=RecipeOut)
 def get_recipe_by_id(id: int):
@@ -41,28 +51,59 @@ def get_recipe_by_id(id: int):
         row = cursor.fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="Recipe not found")
-        return dict(row)
+        return {
+            **dict(row),
+            "category": row["category"].split(","),
+            "ingredients": row["ingredients"].split(",")
+        }
 
 @app.get("/recipes", response_model=List[RecipeOut])
 def get_all_recipes():
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM recipes")
-        return [dict(row) for row in cursor.fetchall()]
+        rows = cursor.fetchall()
+
+        return [
+            {
+                **dict(row),
+                "category": row["category"].split(","),
+                "ingredients": row["ingredients"].split(",")
+            }
+            for row in rows
+        ]
 
 @app.get("/veg-recipes", response_model=List[RecipeOut])
 def get_veg_recipes():
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM recipes WHERE category = ?", ("veg",))
-        return [dict(row) for row in cursor.fetchall()]
+        rows = cursor.fetchall()
+
+        return [
+            {
+                **dict(row),
+                "category": row["category"].split(","),
+                "ingredients": row["ingredients"].split(",")
+            }
+            for row in rows
+        ]
 
 @app.get("/tried-recipes", response_model=List[RecipeOut])
 def get_tried_recipes():
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM recipes WHERE is_tried = 1")
-        return [dict(row) for row in cursor.fetchall()]
+        rows = cursor.fetchall()
+
+        return [
+            {
+                **dict(row),
+                "category": row["category"].split(","),
+                "ingredients": row["ingredients"].split(",")
+            }
+            for row in rows
+        ]
 
 @app.get("/recipes/search", response_model=List[RecipeOut])
 def search_recipes(q: str):
@@ -70,7 +111,16 @@ def search_recipes(q: str):
         cursor = conn.cursor()
         like_query = f"%{q}%"
         cursor.execute("SELECT * FROM recipes WHERE title LIKE ? OR ingredients LIKE ?", (like_query, like_query))
-        return [dict(row) for row in cursor.fetchall()]
+        rows = cursor.fetchall()
+
+        return [
+            {
+                **dict(row),
+                "category": row["category"].split(","),
+                "ingredients": row["ingredients"].split(",")
+            }
+            for row in rows
+        ]
 
 @app.post("/add-sample-recipe", response_model=MessageResponse)
 def add_sample_recipe():

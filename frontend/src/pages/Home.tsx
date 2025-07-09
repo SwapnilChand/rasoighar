@@ -16,9 +16,13 @@ export default function Home() {
   };
 
   const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [open, setOpen] = useState(false);
+
   const fetchRecipes = async () => {
     try {
-      const res = await axios.get("httpS://localhost:8000/recipes");
+      const res = await axios.get("http://localhost:8000/recipes", {
+        headers: { "Content-Type": "application/json" },
+      });
       const data = res.data.map((r: any) => ({
         ...r,
         ingredients: r.ingredients.split(",").map((i: string) => i.trim()),
@@ -35,6 +39,7 @@ export default function Home() {
 
   const handleAdd = (newRecipe: Recipe) => {
     setRecipes((prev) => [...prev, newRecipe]);
+    setOpen(false);
   };
 
   return (
@@ -58,13 +63,13 @@ export default function Home() {
             <RecipeCard key={idx} recipe={recipe} />
           ))}
 
-          <Dialog>
+          <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <button>
                 <AddRecipeCard />
               </button>
             </DialogTrigger>
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-md bg-black rounded-md">
               <RecipeForm onAdd={handleAdd} />
             </DialogContent>
           </Dialog>

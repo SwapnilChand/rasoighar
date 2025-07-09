@@ -1,5 +1,5 @@
 CREATE TABLE recipes (
-    id TEXT PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
     ingredients TEXT NOT NULL,
     steps TEXT NOT NULL,
