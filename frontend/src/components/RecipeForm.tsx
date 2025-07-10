@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,7 +10,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { X } from "lucide-react";
+import { X, ChevronDown, ChevronUp } from "lucide-react";
 
 const CATEGORIES = ["veg", "non-veg", "egg", "dessert", "beverage"];
 
@@ -78,7 +78,7 @@ export default function RecipeForm({ onAdd }: { onAdd: (data: any) => void }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4" title="Add a Recipe">
       <div className="space-y-3">
         <Label>Title</Label>
         <Input value={title} onChange={(e) => setTitle(e.target.value)} />
@@ -93,72 +93,65 @@ export default function RecipeForm({ onAdd }: { onAdd: (data: any) => void }) {
         <Label>Steps</Label>
         <Textarea value={steps} onChange={(e) => setSteps(e.target.value)} />
 
-        <div className="space-y-1 w-full">
-          <Label>Category</Label>
-          <Popover open={isOpen} onOpenChange={setIsOpen}>
-            <PopoverTrigger asChild>
-              <div className="relative w-full">
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  className="w-full justify-start flex-wrap min-h-[44px] bg-black text-white border-white"
-                >
-                  {selectedCategories.length > 0 ? (
-                    <div className="flex flex-wrap gap-2">
-                      {selectedCategories.map((cat) => (
-                        <div
-                          key={cat}
-                          className="flex items-center gap-1 bg-gray-800 text-sm px-2 py-1 rounded"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {cat}
-                          <X
-                            size={14}
-                            className="cursor-pointer"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedCategories((prev) =>
-                                prev.filter((c) => c !== cat)
-                              );
-                            }}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <span className="text-muted-foreground">
-                      Select categories
-                    </span>
-                  )}
-                </Button>
-              </div>
-            </PopoverTrigger>
-
-            <PopoverContent
-              className="w-[var(--radix-popover-trigger-width)] bg-black text-white border border-white rounded-md shadow-lg"
-              side="bottom"
-              align="start"
-            >
-              <div className="flex flex-col space-y-2 max-h-60 overflow-y-auto">
-                {CATEGORIES.map((cat) => (
-                  <div key={cat} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={cat}
-                      checked={selectedCategories.includes(cat)}
-                      onCheckedChange={() => toggleCategory(cat)}
-                    />
-                    <label
-                      htmlFor={cat}
-                      className="capitalize text-sm cursor-pointer"
+        <Label>Category</Label>
+        <Popover open={isOpen} onOpenChange={setIsOpen}>
+          <PopoverTrigger asChild>
+            <div className="relative w-full justify-start flex-wrap min-h-[44px] rounded-md border px-3 py-2">
+              {selectedCategories.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {selectedCategories.map((cat) => (
+                    <div
+                      key={cat}
+                      className="flex items-center gap-1 font-bold bg-gray-800 px-2 py-1 rounded"
+                      onClick={(e) => e.stopPropagation()}
                     >
                       {cat}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
+                      <X
+                        size={14}
+                        className="cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          setSelectedCategories((prev) =>
+                            prev.filter((c) => c !== cat)
+                          );
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <span className="flex flex-row justify-between">
+                  Select categories {isOpen ? <ChevronUp /> : <ChevronDown />}
+                </span>
+              )}
+            </div>
+          </PopoverTrigger>
+
+          <PopoverContent
+            className="w-[var(--radix-popover-trigger-width)] bg-black text-white border border-white rounded-md shadow-lg"
+            side="bottom"
+            align="start"
+          >
+            <div className="flex flex-col space-y-2 max-h-60 overflow-y-auto">
+              {CATEGORIES.map((cat) => (
+                <div key={cat} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={cat}
+                    checked={selectedCategories.includes(cat)}
+                    onCheckedChange={() => toggleCategory(cat)}
+                  />
+                  <label
+                    htmlFor={cat}
+                    className="capitalize text-sm cursor-pointer"
+                  >
+                    {cat}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
 
         <div className="flex items-center space-x-2">
           <Checkbox
@@ -169,16 +162,36 @@ export default function RecipeForm({ onAdd }: { onAdd: (data: any) => void }) {
           <Label htmlFor="tried">Mark as tried</Label>
         </div>
 
-        <Label>Image</Label>
-        <Input
-          type="file"
-          onChange={(e) => setImage(e.target.files?.[0] || null)}
-        />
+        <div className="flex flex-col gap-2">
+          <Label>Image</Label>
+          <div className="relative flex items-center gap-2">
+            <input
+              id="image-upload"
+              type="file"
+              className="hidden"
+              onChange={(e) => setImage(e.target.files?.[0] || null)}
+            />
+            <label
+              htmlFor="image-upload"
+              className="px-4 py-2 bg-blue-800 text-white rounded-md cursor-pointer hover:bg-blue-900 font-medium transition"
+            >
+              Choose File
+            </label>
+            <span className="text-gray-400 text-sm">
+              {image ? image.name : "No file chosen"}
+            </span>
+          </div>
+        </div>
       </div>
 
-      <Button type="submit" className="bg-gray-800 hover:bg-gray-700">
-        Add Recipe
-      </Button>
+      <div className="flex justify-center">
+        <Button
+          type="submit"
+          className="bg-gray-800 hover:bg-gray-700 cursor-pointer"
+        >
+          Add Recipe
+        </Button>
+      </div>
     </form>
   );
 }

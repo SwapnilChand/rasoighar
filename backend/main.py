@@ -73,11 +73,11 @@ def get_all_recipes():
             for row in rows
         ]
 
-@app.get("/veg-recipes", response_model=List[RecipeOut])
-def get_veg_recipes():
+@app.get("/recipes/category/{category}", response_model=List[RecipeOut])
+def get_recipes_by_category(category: str):
     with get_db_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM recipes WHERE category = ?", ("veg",))
+        cursor.execute("SELECT * FROM recipes WHERE category LIKE ?", (f"%{category}%",))
         rows = cursor.fetchall()
 
         return [
