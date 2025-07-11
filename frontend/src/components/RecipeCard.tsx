@@ -21,14 +21,12 @@ export default function RecipeCard({ recipe }: { recipe: any }) {
               (e.currentTarget.style.backgroundImage = `radial-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.9)), url(${API_BASE}${recipe.image_url})`)
             }
           >
-            {recipe.category.split(",").length > 0 ? (
-              recipe.category
-                .split(",")
-                .map((cat: string) => (
-                  <label className="text-sm">
-                    {CATEGORY_EMOJIS[cat] || "🍽"}{" "}
-                  </label>
-                ))
+            {recipe.category.length > 0 ? (
+              recipe.category.map((cat: string) => (
+                <label className="text-sm">
+                  {CATEGORY_EMOJIS[cat] || "🍽"}{" "}
+                </label>
+              ))
             ) : (
               <div className="text-sm">
                 {CATEGORY_EMOJIS[recipe.category] || "🍽"} {recipe.category}
@@ -46,8 +44,8 @@ export default function RecipeCard({ recipe }: { recipe: any }) {
       <DialogContent className="max-w-lg space-y-3 bg-black max-h-[80%]">
         <h2 className="text-2xl font-bold">{recipe.title}</h2>
         <div>
-          {recipe.category.split(",").length > 0 ? (
-            recipe.category.split(",").map((cat: string) => (
+          {recipe.category.length > 0 ? (
+            recipe.category.map((cat: string) => (
               <label className="text-sm">
                 {CATEGORY_EMOJIS[cat] || "🍽"}
                 {cat}

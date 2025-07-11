@@ -19,9 +19,9 @@ app.add_middleware(
 # Pydantic Models
 class Recipe(BaseModel):
     title: Annotated[str, StringConstraints(min_length=1, strip_whitespace=True)]
-    ingredients: Annotated[str, StringConstraints(min_length=1, strip_whitespace=True)]
+    ingredients: Annotated[List[str], StringConstraints(min_length=1)]
     steps: Annotated[str, StringConstraints(min_length=1, strip_whitespace=True)]
-    category: Annotated[List[str], StringConstraints(min_length=1, strip_whitespace=True)]
+    category: Annotated[List[str], StringConstraints(min_length=1)]
     image_url: Optional[str] = None
     is_tried: Annotated[int, Field(ge=0, le=1)] = 0
 

@@ -7,10 +7,11 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 export default function Home() {
   type Recipe = {
+    id?: number;
     title: string;
     ingredients: string[];
     steps: string;
-    category: string;
+    category: string[];
     image_url?: string;
     is_tried?: number;
   };
@@ -23,11 +24,7 @@ export default function Home() {
       const res = await axios.get("http://localhost:8000/recipes", {
         headers: { "Content-Type": "application/json" },
       });
-      const data = res.data.map((r: any) => ({
-        ...r,
-        ingredients: r.ingredients.split(",").map((i: string) => i.trim()),
-      }));
-      setRecipes(data);
+      setRecipes(res.data);
     } catch (err) {
       console.error("Error during fetching recipes", err);
     }
