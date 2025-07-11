@@ -12,7 +12,15 @@ import {
 } from "@/components/ui/popover";
 import { X, ChevronDown, ChevronUp } from "lucide-react";
 
-const CATEGORIES = ["veg", "non-veg", "egg", "dessert", "beverage"];
+export const CATEGORIES = ["veg", "non-veg", "egg", "dessert", "beverage"];
+
+export const CATEGORY_EMOJIS: Record<string, string> = {
+  veg: "🥦",
+  "non-veg": "🍗",
+  egg: "🥚",
+  dessert: "🍰",
+  beverage: "🥤",
+};
 
 export default function RecipeForm({ onAdd }: { onAdd: (data: any) => void }) {
   const [title, setTitle] = useState("");
@@ -101,7 +109,7 @@ export default function RecipeForm({ onAdd }: { onAdd: (data: any) => void }) {
         <Label>Category</Label>
         <Popover open={isOpen} onOpenChange={setIsOpen}>
           <PopoverTrigger asChild>
-            <div className="relative w-full justify-start flex-wrap min-h-[44px] rounded-md border px-3 py-2">
+            <div className="relative w-full flex flex-wrap min-h-[44px] rounded-md border px-3 py-2 justify-between">
               {selectedCategories.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {selectedCategories.map((cat) => (
@@ -110,7 +118,7 @@ export default function RecipeForm({ onAdd }: { onAdd: (data: any) => void }) {
                       className="flex items-center gap-1 font-bold bg-gray-800 px-2 py-1 rounded"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      {cat}
+                      {CATEGORY_EMOJIS[cat] || "🍽"} {cat}
                       <X
                         size={14}
                         className="cursor-pointer"
@@ -127,9 +135,10 @@ export default function RecipeForm({ onAdd }: { onAdd: (data: any) => void }) {
                 </div>
               ) : (
                 <span className="flex flex-row justify-between">
-                  Select categories {isOpen ? <ChevronUp /> : <ChevronDown />}
+                  Select categories
                 </span>
               )}
+              {isOpen ? <ChevronUp /> : <ChevronDown />}
             </div>
           </PopoverTrigger>
 
@@ -139,18 +148,15 @@ export default function RecipeForm({ onAdd }: { onAdd: (data: any) => void }) {
             align="start"
           >
             <div className="flex flex-col space-y-2 max-h-60 overflow-y-auto">
-              {CATEGORIES.map((cat) => (
+              {CATEGORIES.map((cat: string) => (
                 <div key={cat} className="flex items-center space-x-2">
                   <Checkbox
                     id={cat}
                     checked={selectedCategories.includes(cat)}
                     onCheckedChange={() => toggleCategory(cat)}
                   />
-                  <label
-                    htmlFor={cat}
-                    className="capitalize text-sm cursor-pointer"
-                  >
-                    {cat}
+                  <label className="capitalize text-sm cursor-pointer">
+                    {CATEGORY_EMOJIS[cat] || "🍽"} {cat}
                   </label>
                 </div>
               ))}

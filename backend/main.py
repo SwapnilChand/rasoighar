@@ -148,7 +148,7 @@ async def add_recipe(
             image_path = os.path.join(upload_dir, image.filename)
             with open(image_path, "wb") as f:
                 f.write(await image.read())
-            image_url = image_path
+            image_url = f"/uploads/{image.filename}"
         except Exception as e:
             raise HTTPException(status_code=500, detail="Image upload failed")
 
@@ -200,7 +200,7 @@ async def update_recipe(
                 image_path = os.path.join(upload_dir, image.filename)
                 with open(image_path, "wb") as f:
                     f.write(await image.read())
-                image_url = image_path
+                image_url = f"/uploads/{image.filename}"
                 updates["image_url"] = image_url
             except:
                 raise HTTPException(status_code=500, detail="Image update failed")
