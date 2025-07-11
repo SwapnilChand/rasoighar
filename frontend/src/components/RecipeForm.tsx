@@ -81,10 +81,15 @@ export default function RecipeForm({ onAdd }: { onAdd: (data: any) => void }) {
     <form onSubmit={handleSubmit} className="space-y-4" title="Add a Recipe">
       <div className="space-y-3">
         <Label>Title</Label>
-        <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+        <Input
+          required
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
 
         <Label>Ingredients</Label>
         <Input
+          required
           value={ingredients}
           onChange={(e) => setIngredients(e.target.value)}
           placeholder="e.g: chopped-onions, potato"
