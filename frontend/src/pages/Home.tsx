@@ -182,12 +182,22 @@ export default function Home() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <div className="w-[80%] flex flex-row gap-4">
-            {/* toggle for veg */}
-            <div className="border rounded-xl px-2">veg-toggle</div>
-            {/* toggle for non-veg */}
-            <div className="border rounded-xl px-2">nov-toggle</div>
-          </div>
+          <ToggleGroup variant="outline" type="single">
+            <ToggleGroupItem
+              aria-label="veg"
+              value={""}
+              onClick={() => handleFilterByCategory("veg")}
+            >
+              Veg
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              aria-label="non-veg"
+              value={""}
+              onClick={() => handleFilterByCategory("non-veg")}
+            >
+              Non-Veg
+            </ToggleGroupItem>
+          </ToggleGroup>
           <div className="w-[80%] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {recipes.map((recipe, idx) => (
               <RecipeCard
