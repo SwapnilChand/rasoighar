@@ -106,14 +106,6 @@ export default function RecipeCard({
                 <PencilIcon />
               </Button>
             </div>
-            <div className="mt-4 flex flex-row justify-end gap-2">
-              <Button variant="outline" size="icon" onClick={onRequestDelete}>
-                <Trash className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="icon" onClick={onRequestEdit}>
-                <PencilIcon className="h-4 w-4" />
-              </Button>
-            </div>
           </div>
         </div>
       </DialogContent>
