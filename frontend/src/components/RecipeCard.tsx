@@ -87,9 +87,10 @@ export default function RecipeCard({
             </h1>
           </p>
         </div>
-        <div className="flex flex-col flex-1 justify-between p-4">
-          <p>
-            <strong>Steps:</strong> <h1>{recipe.steps}</h1>
+        <div className="flex flex-col flex-1 justify-between p-4 ">
+          <p className="max-h-100">
+            <strong>Steps:</strong>{" "}
+            <p className="whitespace-pre-wrap">{recipe.steps}</p>
           </p>
           <div className="mt-4">
             <div className="flex flex-row justify-end gap-2">

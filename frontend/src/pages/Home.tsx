@@ -169,11 +169,16 @@ export default function Home() {
             <div className="flex justify-end gap-2 pt-4">
               <Button
                 variant="secondary"
+                className="border cursor-pointer"
                 onClick={() => setIsDeleteDialogOpen(false)}
               >
                 Cancel
               </Button>
-              <Button variant="destructive" onClick={handleDelete}>
+              <Button
+                variant="destructive"
+                className="border cursor-pointer"
+                onClick={handleDelete}
+              >
                 Yes, Delete
               </Button>
             </div>
