@@ -1,8 +1,18 @@
 import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
 import { API_BASE } from "@/lib/api";
 import { CATEGORY_EMOJIS } from "./RecipeForm";
+import { PencilIcon, Trash } from "lucide-react";
+import { Button } from "./ui/button";
 
-export default function RecipeCard({ recipe }: { recipe: any }) {
+export default function RecipeCard({
+  recipe,
+  onRequestEdit,
+  onRequestDelete,
+}: {
+  recipe: any;
+  onRequestEdit: () => void;
+  onRequestDelete: () => void;
+}) {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -41,40 +51,70 @@ export default function RecipeCard({ recipe }: { recipe: any }) {
           </div>
         </div>
       </DialogTrigger>
-      <DialogContent className="max-w-lg space-y-3 bg-black max-h-[80%]">
-        <h2 className="text-2xl font-bold">{recipe.title}</h2>
-        <div>
-          {recipe.category.length > 0 ? (
-            recipe.category.map((cat: string) => (
-              <label className="text-sm">
-                {CATEGORY_EMOJIS[cat] || "🍽"}
-                {cat}
-                <br />
-              </label>
-            ))
-          ) : (
-            <div className="text-sm">
-              {CATEGORY_EMOJIS[recipe.category] || "🍽"} {recipe.category}
-            </div>
-          )}
+      <DialogContent className="flex flex-row justify-between min-w-250 space-y-3 bg-black min-h-150 border border-gray-700">
+        <div
+          className="w-1/2 flex flex-col shadow shadow-md rounded-md p-4 gap-y-4"
+          style={{
+            backgroundImage: `radial-gradient(rgba(0,0,0,0.8), rgba(0,0,0,1)), url(${API_BASE}${recipe.image_url})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
+          <h2 className="text-2xl font-bold">{recipe.title}</h2>
+          <div>
+            {recipe.category.length > 0 ? (
+              recipe.category.map((cat: string) => (
+                <label className="text-sm">
+                  {CATEGORY_EMOJIS[cat] || "🍽"}
+                  {cat}
+                  <br />
+                </label>
+              ))
+            ) : (
+              <div className="text-sm">
+                {CATEGORY_EMOJIS[recipe.category] || "🍽"} {recipe.category}
+              </div>
+            )}
+          </div>
+          <p>
+            <strong>Tried</strong> <br />
+            {recipe.is_tried ? "✅ Yes" : "❌ No"}
+          </p>
+          <p>
+            <strong>Ingredients</strong>{" "}
+            <h1 className="text-sm text-gray-400 ">
+              {recipe.ingredients.join(", ")}
+            </h1>
+          </p>
         </div>
-        <p>
-          <strong>Ingredients:</strong> {recipe.ingredients.join(", ")}
-        </p>
-        <p>
-          <strong>Steps:</strong> {recipe.steps}
-        </p>
-        <p>
-          <strong>Tried:</strong> {recipe.is_tried ? "✅ Yes" : "❌ No"}
-        </p>
-        <div className="flex justify-center">
-          {recipe.image_url && (
-            <img
-              src={`${API_BASE}${recipe.image_url}`}
-              alt={recipe.title}
-              className="w-auto rounded-md max-h-[60%]"
-            />
-          )}
+        <div className="flex flex-col flex-1 justify-between p-4">
+          <p>
+            <strong>Steps:</strong> <h1>{recipe.steps}</h1>
+          </p>
+          <div className="mt-4">
+            <div className="flex flex-row justify-end gap-2">
+              <Button
+                className="border rounded-md hover:text-grey-700 cursor-pointer hover:bg-grey-800"
+                onClick={onRequestDelete}
+              >
+                <Trash />
+              </Button>
+              <Button
+                className="border rounded-md hover:text-grey-700 cursor-pointer hover:bg-grey-800"
+                onClick={onRequestEdit}
+              >
+                <PencilIcon />
+              </Button>
+            </div>
+            <div className="mt-4 flex flex-row justify-end gap-2">
+              <Button variant="outline" size="icon" onClick={onRequestDelete}>
+                <Trash className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="icon" onClick={onRequestEdit}>
+                <PencilIcon className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

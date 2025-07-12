@@ -1,5 +1,4 @@
-import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,6 +10,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { X, ChevronDown, ChevronUp } from "lucide-react";
+import type { Recipe } from "@/pages/Home";
 
 export const CATEGORIES = ["veg", "non-veg", "egg", "dessert", "beverage"];
 
@@ -22,14 +22,45 @@ export const CATEGORY_EMOJIS: Record<string, string> = {
   beverage: "🥤",
 };
 
-export default function RecipeForm({ onAdd }: { onAdd: (data: any) => void }) {
-  const [title, setTitle] = useState("");
-  const [ingredients, setIngredients] = useState("");
-  const [steps, setSteps] = useState("");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
-  const [isTried, setIsTried] = useState(false);
+export default function RecipeForm({
+  initialData,
+  onSubmit,
+  isEdit,
+}: {
+  initialData?: Recipe | null;
+  onSubmit: (formData: FormData) => void;
+  isEdit?: boolean;
+}) {
+  const [title, setTitle] = useState(initialData?.title || "");
+  const [ingredients, setIngredients] = useState(
+    initialData?.ingredients?.join(", ") || ""
+  );
+  const [steps, setSteps] = useState(initialData?.steps || "");
+  const [selectedCategories, setSelectedCategories] = useState(
+    initialData?.category || []
+  );
+  const [isTried, setIsTried] = useState(initialData?.is_tried === 1);
   const [image, setImage] = useState<File | null>(null);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  useEffect(() => {
+    if (initialData) {
+      setTitle(initialData.title);
+      setIngredients(initialData.ingredients.join(", "));
+      setSteps(initialData.steps);
+      setSelectedCategories(initialData.category);
+      setIsTried(initialData.is_tried === 1);
+      setImage(null);
+    } else {
+      //reset form
+      setTitle("");
+      setIngredients("");
+      setSteps("");
+      setSelectedCategories([]);
+      setIsTried(false);
+      setImage(null);
+    }
+  }, [initialData]);
 
   const toggleCategory = (cat: string) => {
     setSelectedCategories((prev) =>
@@ -51,38 +82,7 @@ export default function RecipeForm({ onAdd }: { onAdd: (data: any) => void }) {
     if (image) {
       formData.append("image", image);
     }
-
-    try {
-      const res = await axios.post(
-        "http://localhost:8000/add-recipe",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      const recipe = {
-        title,
-        ingredients: ingredients.split(",").map((i) => i.trim()),
-        steps,
-        category,
-        is_tried: isTried ? 1 : 0,
-        image_url: res.data.image_url || null,
-      };
-
-      onAdd(recipe);
-      // Reset form
-      setTitle("");
-      setIngredients("");
-      setSteps("");
-      setSelectedCategories([]);
-      setIsTried(false);
-      setImage(null);
-    } catch (err) {
-      console.error("Failed to add recipe", err);
-    }
+    onSubmit(formData);
   };
 
   return (
@@ -107,7 +107,7 @@ export default function RecipeForm({ onAdd }: { onAdd: (data: any) => void }) {
         <Textarea value={steps} onChange={(e) => setSteps(e.target.value)} />
 
         <Label>Category</Label>
-        <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
           <PopoverTrigger asChild>
             <div className="relative w-full flex flex-wrap min-h-[44px] rounded-md border px-3 py-2 justify-between">
               {selectedCategories.length > 0 ? (
@@ -138,7 +138,7 @@ export default function RecipeForm({ onAdd }: { onAdd: (data: any) => void }) {
                   Select categories
                 </span>
               )}
-              {isOpen ? <ChevronUp /> : <ChevronDown />}
+              {isPopoverOpen ? <ChevronUp /> : <ChevronDown />}
             </div>
           </PopoverTrigger>
 
@@ -200,7 +200,7 @@ export default function RecipeForm({ onAdd }: { onAdd: (data: any) => void }) {
           type="submit"
           className="bg-gray-800 hover:bg-gray-700 cursor-pointer"
         >
-          Add Recipe
+          {isEdit ? "Update Recipe" : "Add Recipe"}
         </Button>
       </div>
     </form>
