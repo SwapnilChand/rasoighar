@@ -105,7 +105,7 @@ def get_tried_recipes():
             for row in rows
         ]
 
-@app.get("/recipes/search", response_model=List[RecipeOut])
+@app.get("/recipes/search/q", response_model=List[RecipeOut])
 def search_recipes(q: str):
     with get_db_connection() as conn:
         cursor = conn.cursor()

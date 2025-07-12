@@ -11,7 +11,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { API_BASE } from "@/lib/api";
+import { Search } from "lucide-react";
 
 export type Recipe = {
   id: number;
@@ -29,6 +31,9 @@ export default function Home() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   const handleRequestEdit = (recipe: Recipe) => {
     setSelectedRecipe(recipe);
@@ -104,50 +109,101 @@ export default function Home() {
     }
   };
 
+  // Search for a recipe
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchQuery) {
+        const fetchSearchResults = async () => {
+          try {
+            const res = await axios.get(`${API_BASE}/search?q=${searchQuery}`);
+            setRecipes(res.data);
+          } catch (err) {
+            console.error("Error while searching for ${searchQuery}", err);
+          }
+        };
+        fetchSearchResults();
+      } else {
+        //say no results found in the search box. and add a cross button at the end
+      }
+    }, 500);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [searchQuery]);
+
+  //Filter search results by category
+  const handleFilterByCategory = async (category: string) => {
+    if (activeCategory === category) {
+      setActiveCategory(null);
+      fetchRecipes();
+      return;
+    }
+
+    setActiveCategory(category);
+    try {
+      const res = await axios.get(`${API_BASE}/recipes/category/${category}`);
+      setRecipes(res.data);
+    } catch (err) {
+      console.log("Error applying category filter", err);
+    }
+  };
+
   return (
     <>
       <div className="min-h-screen flex flex-col space-y-6 px-4 pt-12">
-        <div className="flex flex-row justify-between">
-          <h1 className="max-w-4xl text-xl font-bold mx-auto">
-            <span role="img" aria-label="pan">
-              🍳
-            </span>{" "}
-            Rasoi Ghar
-          </h1>
+        <h1 className="max-w-4xl text-xl font-bold mx-auto">
+          <span role="img" aria-label="pan">
+            🍳
+          </span>{" "}
+          Rasoi Ghar
+        </h1>
+        <div className="flex flex-row justify-end">
           {/* Dialog for adding a recipe */}
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="cursor-pointer text-gray-300 hover:bg-gray-600 border">
+              <Button className="cursor-pointer rounded-xl text-gray-300 hover:bg-gray-600 border">
                 Add Recipe
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md bg-black rounded-md">
+            <DialogContent className="max-w-md bg-black rounded-xl">
               <RecipeForm onSubmit={handleAdd} />
             </DialogContent>
           </Dialog>
         </div>
-
-        <input
-          type="text"
-          placeholder="Search recipes..."
-          className="w-full px-4 py-2 border rounded-md shadow-sm"
-        />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {recipes.map((recipe, idx) => (
-            <RecipeCard
-              key={idx}
-              recipe={recipe}
-              onRequestEdit={() => handleRequestEdit(recipe)}
-              onRequestDelete={() => handleRequestDelete(recipe)}
+        <div className="flex flex-col items-center gap-y-4">
+          <div className="flex flex-row w-[80%] items-center gap-4">
+            <Search />
+            <input
+              type="text"
+              placeholder="Search recipes by title or ingredients"
+              className="w-full px-4 py-2 border rounded-xl shadow-sm"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
-          ))}
+          </div>
+          <div className="w-[80%] flex flex-row gap-4">
+            {/* toggle for veg */}
+            <div className="border rounded-xl px-2">veg-toggle</div>
+            {/* toggle for non-veg */}
+            <div className="border rounded-xl px-2">nov-toggle</div>
+          </div>
+          <div className="w-[80%] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {recipes.map((recipe, idx) => (
+              <RecipeCard
+                key={idx}
+                recipe={recipe}
+                onRequestEdit={() => handleRequestEdit(recipe)}
+                onRequestDelete={() => handleRequestDelete(recipe)}
+              />
+            ))}
+          </div>
         </div>
 
         {/* Edit dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           {" "}
-          <DialogContent className="max-w-md bg-black rounded-md">
+          <DialogContent className="max-w-md bg-black rounded-xl">
             <RecipeForm
               isEdit
               initialData={selectedRecipe}
@@ -158,7 +214,7 @@ export default function Home() {
         {/* Delete dialog */}
         <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
           {" "}
-          <DialogContent className="max-w-md bg-black rounded-md">
+          <DialogContent className="max-w-md bg-black rounded-xl">
             <DialogHeader>
               <DialogTitle>Are you sure?</DialogTitle>
               <DialogDescription>
