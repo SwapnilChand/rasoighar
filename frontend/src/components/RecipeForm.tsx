@@ -104,7 +104,11 @@ export default function RecipeForm({
         />
 
         <Label>Steps</Label>
-        <Textarea value={steps} onChange={(e) => setSteps(e.target.value)} />
+        <Textarea
+          value={steps}
+          onChange={(e) => setSteps(e.target.value)}
+          className="max-h-50"
+        />
 
         <Label>Category</Label>
         <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
