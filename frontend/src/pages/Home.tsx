@@ -136,18 +136,17 @@ export default function Home() {
 
   //Filter search results by category
   const handleFilterByCategory = async (category: string) => {
-    if (activeCategory === category) {
+    if (category) {
+      setActiveCategory(category);
+      try {
+        const res = await axios.get(`${API_BASE}/recipes/category/${category}`);
+        setRecipes(res.data);
+      } catch (err) {
+        console.log("Error applying category filter", err);
+      }
+    } else {
       setActiveCategory(null);
       fetchRecipes();
-      return;
-    }
-
-    setActiveCategory(category);
-    try {
-      const res = await axios.get(`${API_BASE}/recipes/category?q=${category}`);
-      setRecipes(res.data);
-    } catch (err) {
-      console.log("Error applying category filter", err);
     }
   };
 
@@ -205,18 +204,23 @@ export default function Home() {
               </button>
             )}
           </div>
-          <ToggleGroup variant="outline" type="single">
+          <ToggleGroup
+            variant="outline"
+            type="single"
+            value={activeCategory || ""}
+            onValueChange={handleFilterByCategory}
+          >
             <ToggleGroupItem
+              className="p-4 hover:bg-gray-800 cursor-pointer data-[state=on]:bg-gray-800 data-[state=on]:text-white capitalize"
               aria-label="veg"
-              value={""}
-              onClick={() => handleFilterByCategory("veg")}
+              value={"veg"}
             >
               Veg
             </ToggleGroupItem>
             <ToggleGroupItem
+              className="p-4 hover:bg-gray-800 cursor-pointer data-[state=on]:bg-gray-800 data-[state=on]:text-white capitalize"
               aria-label="non-veg"
-              value={""}
-              onClick={() => handleFilterByCategory("non-veg")}
+              value={"non-veg"}
             >
               Non-Veg
             </ToggleGroupItem>
