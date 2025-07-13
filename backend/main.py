@@ -73,7 +73,7 @@ def get_all_recipes():
             for row in rows
         ]
 
-@app.get("/recipes/category/{category}", response_model=List[RecipeOut])
+@app.get("/recipes/category", response_model=List[RecipeOut])
 def get_recipes_by_category(category: str):
     with get_db_connection() as conn:
         cursor = conn.cursor()
@@ -105,8 +105,8 @@ def get_tried_recipes():
             for row in rows
         ]
 
-@app.get("/recipes/search/q", response_model=List[RecipeOut])
-def search_recipes(q: str):
+@app.get("/recipes/search/{q}", response_model=List[RecipeOut])
+def search_recipes(q: Optional[str]):
     with get_db_connection() as conn:
         cursor = conn.cursor()
         like_query = f"%{q}%"

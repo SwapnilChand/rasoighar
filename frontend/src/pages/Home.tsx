@@ -112,18 +112,20 @@ export default function Home() {
   // Search for a recipe
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (searchQuery) {
+      if (searchQuery.trim() !== "") {
         const fetchSearchResults = async () => {
           try {
-            const res = await axios.get(`${API_BASE}/search?q=${searchQuery}`);
+            const res = await axios.get(
+              `${API_BASE}/recipes/search/${searchQuery}`
+            );
             setRecipes(res.data);
           } catch (err) {
-            console.error("Error while searching for ${searchQuery}", err);
+            console.error("Error while searching for {searchQuery}", err);
           }
         };
         fetchSearchResults();
       } else {
-        //say no results found in the search box. and add a cross button at the end
+        fetchRecipes();
       }
     }, 500);
 
@@ -142,7 +144,7 @@ export default function Home() {
 
     setActiveCategory(category);
     try {
-      const res = await axios.get(`${API_BASE}/recipes/category/${category}`);
+      const res = await axios.get(`${API_BASE}/recipes/category?q=${category}`);
       setRecipes(res.data);
     } catch (err) {
       console.log("Error applying category filter", err);
@@ -181,6 +183,27 @@ export default function Home() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="text-gray-400 hover:text-white"
+                aria-label="Clear search"
+              >
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            )}
           </div>
           <ToggleGroup variant="outline" type="single">
             <ToggleGroupItem
@@ -199,14 +222,20 @@ export default function Home() {
             </ToggleGroupItem>
           </ToggleGroup>
           <div className="w-[80%] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {recipes.map((recipe, idx) => (
-              <RecipeCard
-                key={idx}
-                recipe={recipe}
-                onRequestEdit={() => handleRequestEdit(recipe)}
-                onRequestDelete={() => handleRequestDelete(recipe)}
-              />
-            ))}
+            {recipes.length > 0 ? (
+              recipes.map((recipe, idx) => (
+                <RecipeCard
+                  key={idx}
+                  recipe={recipe}
+                  onRequestEdit={() => handleRequestEdit(recipe)}
+                  onRequestDelete={() => handleRequestDelete(recipe)}
+                />
+              ))
+            ) : searchQuery ? (
+              <p>No results found for "{searchQuery}"</p>
+            ) : (
+              <p>No recipes to show. Try adding one!</p>
+            )}
           </div>
         </div>
 
