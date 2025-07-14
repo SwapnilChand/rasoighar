@@ -7,10 +7,12 @@ __pycache__/
 *.log
 
 # Virtual environments
-.venv/
+*.venv/
 .env/
 .envrc/
-
+venv/
+backend/venv/
+**/venv/
 # Node/Frontend (for later)
 node_modules/
 dist/
