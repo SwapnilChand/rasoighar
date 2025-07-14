@@ -248,9 +248,9 @@ export default function Home() {
                   recipe={recipe}
                   onRequestEdit={() => handleRequestEdit(recipe)}
                   onRequestDelete={() => handleRequestDelete(recipe)}
-                  onAddIngredients={() =>
-                    handleAddIngredients(recipe.ingredients)
-                  }
+                  onAddIngredients={() => {
+                    handleAddIngredients(recipe.ingredients);
+                  }}
                 />
               ))
             ) : searchQuery ? (

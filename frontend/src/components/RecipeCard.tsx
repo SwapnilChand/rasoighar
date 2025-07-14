@@ -57,11 +57,10 @@ export default function RecipeCard({
                   className="rounded-md bg-brand-bg text-green hover:bg-gray-200 cursor-pointer"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onAddIngredients;
+                    onAddIngredients();
                   }}
                 >
-                  {" "}
-                  Add{" "}
+                  Add
                 </Button>
               </div>
             </div>
