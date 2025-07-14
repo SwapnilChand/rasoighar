@@ -32,9 +32,9 @@ export default function Home() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
+  const [cartRecipeIds, setCartRecipeIds] = useState(new Set<number>());
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
-  const [shoppingList, setShoppingList] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
@@ -48,12 +48,20 @@ export default function Home() {
     setIsDeleteDialogOpen(true);
   };
 
-  const handleAddIngredients = (ingredients: string[]) => {
-    setShoppingList((prev) => {
-      const newList = new Set([...prev, ...ingredients]);
-      return Array.from(newList);
+  const handleToggleCartItem = (recipeId: number) => {
+    setCartRecipeIds((prevIds) => {
+      const newIds = new Set(prevIds);
+
+      if (newIds.has(recipeId)) {
+        newIds.delete(recipeId);
+      } else {
+        newIds.add(recipeId);
+      }
+      return newIds;
     });
   };
+
+  const cartItems = recipes.filter((recipe) => cartRecipeIds.has(recipe.id));
 
   // FETCH all recipes on mount
   const fetchRecipes = async () => {
@@ -242,15 +250,16 @@ export default function Home() {
           {/* Cards */}
           <div className="w-[80%] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {recipes.length > 0 ? (
-              recipes.map((recipe, idx) => (
+              recipes.map((recipe) => (
                 <RecipeCard
-                  key={idx}
+                  key={recipe.id}
                   recipe={recipe}
                   onRequestEdit={() => handleRequestEdit(recipe)}
                   onRequestDelete={() => handleRequestDelete(recipe)}
-                  onAddIngredients={() => {
-                    handleAddIngredients(recipe.ingredients);
+                  onToggleCart={() => {
+                    handleToggleCartItem(recipe.id);
                   }}
+                  isInCart={cartRecipeIds.has(recipe.id)}
                 />
               ))
             ) : searchQuery ? (
@@ -260,11 +269,12 @@ export default function Home() {
             )}
           </div>
           {/* Bottom Shopping Sheet */}
-          {shoppingList.length > 0 && (
+          {cartItems.length > 0 && (
             <ShoppingCart
-              items={shoppingList}
+              items={cartItems}
               isCartOpen={isCartOpen}
               onToggle={() => setIsCartOpen((prev) => !prev)}
+              onRemoveItem={handleToggleCartItem}
             />
           )}
         </div>

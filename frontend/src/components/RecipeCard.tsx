@@ -1,19 +1,21 @@
 import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
 import { API_BASE } from "@/lib/api";
 import { CATEGORY_EMOJIS } from "./RecipeForm";
-import { PencilIcon, Trash } from "lucide-react";
+import { PencilIcon, Trash, Check } from "lucide-react";
 import { Button } from "./ui/button";
 
 export default function RecipeCard({
   recipe,
   onRequestEdit,
   onRequestDelete,
-  onAddIngredients,
+  onToggleCart,
+  isInCart,
 }: {
   recipe: any;
   onRequestEdit: () => void;
   onRequestDelete: () => void;
-  onAddIngredients: () => void;
+  onToggleCart: () => void;
+  isInCart: boolean;
 }) {
   return (
     <Dialog>
@@ -52,16 +54,35 @@ export default function RecipeCard({
               </div>
               {/* Add ingredients to Cart Button */}
               <div className="flex justify-end">
-                <Button
-                  title="Add Ingredients to Cart"
-                  className="rounded-md bg-brand-bg text-green hover:bg-gray-200 cursor-pointer"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onAddIngredients();
-                  }}
-                >
-                  Add
-                </Button>
+                {isInCart ? (
+                  <Button
+                    title="Remove Ingredients from Cart"
+                    className="flex rounded-md bg-green-600 text-white hover:bg-red-700 cursor-pointer group"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleCart();
+                    }}
+                  >
+                    <span className="group-hover:hidden">
+                      <Check /> Added
+                    </span>
+                    <span className="hidden group-hover:block">
+                      <Trash />
+                      Remove
+                    </span>
+                  </Button>
+                ) : (
+                  <Button
+                    title="Add Ingredients to Cart"
+                    className="rounded-md bg-brand-bg text-green hover:bg-gray-200 cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleCart();
+                    }}
+                  >
+                    Add
+                  </Button>
+                )}
               </div>
             </div>
           </div>
