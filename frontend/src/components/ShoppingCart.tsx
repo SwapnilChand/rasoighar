@@ -14,9 +14,6 @@ export default function ShoppingCart({
   onToggle: () => void;
   onRemoveItem: (id: number) => void;
 }) {
-  const allIngredients = items.flatMap((item) => item.ingredients);
-  const uniqueIngredients = new Set(allIngredients);
-
   return (
     <>
       {isCartOpen ? (

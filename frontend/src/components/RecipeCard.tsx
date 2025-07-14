@@ -3,6 +3,7 @@ import { API_BASE } from "@/lib/api";
 import { CATEGORY_EMOJIS } from "./RecipeForm";
 import { PencilIcon, Trash, Check } from "lucide-react";
 import { Button } from "./ui/button";
+import type { Recipe } from "@/pages/Home";
 
 export default function RecipeCard({
   recipe,
@@ -11,7 +12,7 @@ export default function RecipeCard({
   onToggleCart,
   isInCart,
 }: {
-  recipe: any;
+  recipe: Recipe;
   onRequestEdit: () => void;
   onRequestDelete: () => void;
   onToggleCart: () => void;
@@ -99,19 +100,14 @@ export default function RecipeCard({
         >
           <h2 className="text-2xl font-bold">{recipe.title}</h2>
           <div>
-            {recipe.category.length > 0 ? (
+            {recipe.category.length > 0 &&
               recipe.category.map((cat: string) => (
                 <label className="text-sm">
                   {CATEGORY_EMOJIS[cat] || "🍽"}
                   {cat}
                   <br />
                 </label>
-              ))
-            ) : (
-              <div className="text-sm">
-                {CATEGORY_EMOJIS[recipe.category] || "🍽"} {recipe.category}
-              </div>
-            )}
+              ))}
           </div>
           <p>
             <strong>Tried</strong> <br />
