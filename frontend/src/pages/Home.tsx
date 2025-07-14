@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import RecipeCard from "@/components/RecipeCard";
 import RecipeForm from "@/components/RecipeForm";
+import ShoppingCart from "@/components/ShoppingCart";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -26,12 +27,14 @@ export type Recipe = {
 };
 
 export default function Home() {
-  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
+  const [shoppingList, setShoppingList] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
@@ -43,6 +46,13 @@ export default function Home() {
   const handleRequestDelete = (recipe: Recipe) => {
     setSelectedRecipe(recipe);
     setIsDeleteDialogOpen(true);
+  };
+
+  const handleAddIngredients = (ingredients: string[]) => {
+    setShoppingList((prev) => {
+      const newList = new Set([...prev, ...ingredients]);
+      return Array.from(newList);
+    });
   };
 
   // FETCH all recipes on mount
@@ -153,6 +163,7 @@ export default function Home() {
   return (
     <>
       <div className="min-h-screen flex flex-col space-y-6 px-4 pt-12 bg-brand-bg text-brand-text">
+        {/* Title */}
         <h1 className="max-w-4xl text-xl font-bold mx-auto text-brand-text">
           <span role="img" aria-label="pan">
             🍳
@@ -172,8 +183,10 @@ export default function Home() {
             </DialogContent>
           </Dialog>
         </div>
+
         <div className="flex flex-col items-center gap-y-4">
           <div className="flex flex-row w-[80%] items-center gap-4">
+            {/* Search */}
             <Search className="text-brand-text" />
             <input
               type="text"
@@ -204,6 +217,7 @@ export default function Home() {
               </button>
             )}
           </div>
+          {/* Filters */}
           <ToggleGroup
             variant="outline"
             type="single"
@@ -225,6 +239,7 @@ export default function Home() {
               Non-Veg
             </ToggleGroupItem>
           </ToggleGroup>
+          {/* Cards */}
           <div className="w-[80%] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {recipes.length > 0 ? (
               recipes.map((recipe, idx) => (
@@ -233,6 +248,9 @@ export default function Home() {
                   recipe={recipe}
                   onRequestEdit={() => handleRequestEdit(recipe)}
                   onRequestDelete={() => handleRequestDelete(recipe)}
+                  onAddIngredients={() =>
+                    handleAddIngredients(recipe.ingredients)
+                  }
                 />
               ))
             ) : searchQuery ? (
@@ -241,6 +259,14 @@ export default function Home() {
               <p>No recipes to show. Try adding one!</p>
             )}
           </div>
+          {/* Bottom Shopping Sheet */}
+          {shoppingList.length > 0 && (
+            <ShoppingCart
+              items={shoppingList}
+              isCartOpen={isCartOpen}
+              onToggle={() => setIsCartOpen((prev) => !prev)}
+            />
+          )}
         </div>
 
         {/* Edit dialog */}

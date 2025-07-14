@@ -8,15 +8,17 @@ export default function RecipeCard({
   recipe,
   onRequestEdit,
   onRequestDelete,
+  onAddIngredients,
 }: {
   recipe: any;
   onRequestEdit: () => void;
   onRequestDelete: () => void;
+  onAddIngredients: () => void;
 }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <div className="flex flex-col cursor-pointer rounded-xl border border-gray-600 h-100 overflow-hidden">
+        <div className="flex flex-col cursor-pointer rounded-xl border border-gray-600 h-70 overflow-hidden">
           <div
             className="h-full transition-transform duration-300 ease-in-out hover:scale-102 p-4"
             style={{
@@ -31,27 +33,42 @@ export default function RecipeCard({
               (e.currentTarget.style.backgroundImage = `radial-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.9)), url(${API_BASE}${recipe.image_url})`)
             }
           >
-            {recipe.category.length > 0 ? (
+            {recipe.category.length > 0 &&
               recipe.category.map((cat: string) => (
                 <label className="text-sm">
                   {CATEGORY_EMOJIS[cat] || "🍽"}{" "}
                 </label>
-              ))
-            ) : (
-              <div className="text-sm">
-                {CATEGORY_EMOJIS[recipe.category] || "🍽"} {recipe.category}
-              </div>
-            )}
+              ))}
 
             <div className="h-5" />
-            <h5 className="font-semibold text-xl text-white">{recipe.title}</h5>
-            <h1 className="text-sm text-gray-400 ">
-              {recipe.ingredients.join(", ")}
-            </h1>
+            <div className="flex justify-between">
+              <div>
+                <h5 className="font-semibold text-xl text-white">
+                  {recipe.title}
+                </h5>
+                <h1 className="text-sm text-gray-400 ">
+                  {recipe.ingredients.join(", ")}
+                </h1>
+              </div>
+              {/* Add ingredients to Cart Button */}
+              <div className="flex justify-end">
+                <Button
+                  title="Add Ingredients to Cart"
+                  className="rounded-md bg-brand-bg text-green hover:bg-gray-200 cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAddIngredients;
+                  }}
+                >
+                  {" "}
+                  Add{" "}
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </DialogTrigger>
-      <DialogContent className="flex flex-row justify-between min-w-250 space-y-3 bg-black min-h-150 border border-gray-700">
+      <DialogContent className="flex flex-row justify-between min-w-250 space-y-3 bg-black text-white min-h-150 border border-gray-700">
         <div
           className="w-1/2 flex flex-col shadow shadow-md rounded-md p-4 gap-y-4"
           style={{
