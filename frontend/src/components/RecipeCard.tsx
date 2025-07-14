@@ -95,13 +95,13 @@ export default function RecipeCard({
           <div className="mt-4">
             <div className="flex flex-row justify-end gap-2">
               <Button
-                className="border rounded-md hover:text-grey-700 cursor-pointer hover:bg-grey-800"
+                className="border rounded-md hover:text-grey-700 cursor-pointer hover:bg-gray-800"
                 onClick={onRequestDelete}
               >
                 <Trash />
               </Button>
               <Button
-                className="border rounded-md hover:text-grey-700 cursor-pointer hover:bg-grey-800"
+                className="border rounded-md hover:text-grey-700 cursor-pointer hover:bg-gray-800"
                 onClick={onRequestEdit}
               >
                 <PencilIcon />

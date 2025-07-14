@@ -210,12 +210,20 @@ async def update_recipe(
 
         set_clause = ",".join([f"{k} = ?" for k in updates.keys()])
         values = list(updates.values()) + [id]
-        cursor.execute(f"UPDATE recipes SET {set_clause} WHERE id = ?", values)
+        query = f"UPDATE recipes SET {set_clause} WHERE id = ? RETURNING *"
+        cursor.execute(query, tuple(values))
+        updated_row = cursor.fetchone()
         conn.commit()
 
+        if not updated_row:
+            raise HTTPException(status_code=404, detail="Recipe not found during update.")
+        
         # Return updated row
-        cursor.execute("SELECT * FROM recipes WHERE id = ?", (id,))
-        return dict(cursor.fetchone())
+        return {
+                **dict(updated_row),
+                "category": updated_row["category"].split(","),
+                "ingredients": updated_row["ingredients"].split(","),
+            }
 
 @app.delete("/recipes/{id}", response_model=MessageResponse)
 def delete_recipe(id: int):

@@ -268,14 +268,14 @@ export default function Home() {
             <div className="flex justify-end gap-2 pt-4">
               <Button
                 variant="secondary"
-                className="border cursor-pointer"
+                className="border cursor-pointer hover:bg-gray-800"
                 onClick={() => setIsDeleteDialogOpen(false)}
               >
                 Cancel
               </Button>
               <Button
                 variant="destructive"
-                className="border cursor-pointer"
+                className="border cursor-pointer hover:bg-gray-800"
                 onClick={handleDelete}
               >
                 Yes, Delete
