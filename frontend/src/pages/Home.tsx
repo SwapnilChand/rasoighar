@@ -152,8 +152,8 @@ export default function Home() {
 
   return (
     <>
-      <div className="min-h-screen flex flex-col space-y-6 px-4 pt-12">
-        <h1 className="max-w-4xl text-xl font-bold mx-auto">
+      <div className="min-h-screen flex flex-col space-y-6 px-4 pt-12 bg-brand-bg text-brand-text">
+        <h1 className="max-w-4xl text-xl font-bold mx-auto text-brand-text">
           <span role="img" aria-label="pan">
             🍳
           </span>{" "}
@@ -163,29 +163,29 @@ export default function Home() {
           {/* Dialog for adding a recipe */}
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="cursor-pointer rounded-xl text-gray-300 hover:bg-gray-600 border">
+              <Button className="cursor-pointer rounded-xl text-brand-text hover:bg-brand-subtle hover:text-white border">
                 Add Recipe
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md bg-black rounded-xl">
+            <DialogContent className="max-w-md bg-brand-bg rounded-xl">
               <RecipeForm onSubmit={handleAdd} />
             </DialogContent>
           </Dialog>
         </div>
         <div className="flex flex-col items-center gap-y-4">
           <div className="flex flex-row w-[80%] items-center gap-4">
-            <Search />
+            <Search className="text-brand-text" />
             <input
               type="text"
               placeholder="Search recipes by title or ingredients"
-              className="w-full px-4 py-2 border rounded-xl shadow-sm"
+              className="w-full text-brand-text px-4 py-2 border rounded-xl shadow-sm"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
-                className="text-gray-400 hover:text-white"
+                className="text-brand-text hover:text-white"
                 aria-label="Clear search"
               >
                 <svg
@@ -211,14 +211,14 @@ export default function Home() {
             onValueChange={handleFilterByCategory}
           >
             <ToggleGroupItem
-              className="p-4 hover:bg-gray-800 cursor-pointer data-[state=on]:bg-gray-800 data-[state=on]:text-white capitalize"
+              className="p-4 hover:bg-green-600 text-brand-text hover:text-white cursor-pointer data-[state=on]:bg-green-800 data-[state=on]:text-white capitalize"
               aria-label="veg"
               value={"veg"}
             >
               Veg
             </ToggleGroupItem>
             <ToggleGroupItem
-              className="p-4 hover:bg-gray-800 cursor-pointer data-[state=on]:bg-gray-800 data-[state=on]:text-white capitalize"
+              className="p-4 hover:bg-red-600 text-brand-text hover:text-white cursor-pointer data-[state=on]:bg-red-800 data-[state=on]:text-white capitalize"
               aria-label="non-veg"
               value={"non-veg"}
             >
@@ -246,7 +246,7 @@ export default function Home() {
         {/* Edit dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           {" "}
-          <DialogContent className="max-w-md bg-black rounded-xl">
+          <DialogContent className="max-w-md bg-brand-bg rounded-xl">
             <RecipeForm
               isEdit
               initialData={selectedRecipe}
@@ -257,7 +257,7 @@ export default function Home() {
         {/* Delete dialog */}
         <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
           {" "}
-          <DialogContent className="max-w-md bg-black rounded-xl">
+          <DialogContent className="max-w-md bg-brand-bg text-brand-text rounded-xl">
             <DialogHeader>
               <DialogTitle>Are you sure?</DialogTitle>
               <DialogDescription>
@@ -268,14 +268,14 @@ export default function Home() {
             <div className="flex justify-end gap-2 pt-4">
               <Button
                 variant="secondary"
-                className="border cursor-pointer hover:bg-gray-800"
+                className="border cursor-pointer hover:bg-brand-subtle"
                 onClick={() => setIsDeleteDialogOpen(false)}
               >
                 Cancel
               </Button>
               <Button
                 variant="destructive"
-                className="border cursor-pointer hover:bg-gray-800"
+                className="border cursor-pointer bg-red-600 hover:bg-red-800"
                 onClick={handleDelete}
               >
                 Yes, Delete

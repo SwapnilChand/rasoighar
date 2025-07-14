@@ -44,7 +44,7 @@ export default function RecipeCard({
             )}
 
             <div className="h-5" />
-            <h5 className="font-semibold text-xl">{recipe.title}</h5>
+            <h5 className="font-semibold text-xl text-white">{recipe.title}</h5>
             <h1 className="text-sm text-gray-400 ">
               {recipe.ingredients.join(", ")}
             </h1>

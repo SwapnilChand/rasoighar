@@ -86,7 +86,11 @@ export default function RecipeForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4" title="Add a Recipe">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 text-brand-text"
+      title="Add a Recipe"
+    >
       <div className="space-y-3">
         <Label>Title</Label>
         <Input
@@ -119,7 +123,7 @@ export default function RecipeForm({
                   {selectedCategories.map((cat) => (
                     <div
                       key={cat}
-                      className="flex items-center gap-1 font-bold bg-gray-800 px-2 py-1 rounded"
+                      className="flex items-center gap-1 font-bold bg-brand-secondary px-2 py-1 rounded"
                       onClick={(e) => e.stopPropagation()}
                     >
                       {CATEGORY_EMOJIS[cat] || "🍽"} {cat}
@@ -147,7 +151,7 @@ export default function RecipeForm({
           </PopoverTrigger>
 
           <PopoverContent
-            className="w-[var(--radix-popover-trigger-width)] bg-black text-white border border-white rounded-md shadow-lg"
+            className="w-[var(--radix-popover-trigger-width)] bg-brand-bg text-brand-text rounded-md shadow-lg"
             side="bottom"
             align="start"
           >
@@ -202,7 +206,7 @@ export default function RecipeForm({
       <div className="flex justify-center">
         <Button
           type="submit"
-          className="bg-gray-800 hover:bg-gray-700 cursor-pointer"
+          className="bg-brand-primary hover:bg-brand-subtle cursor-pointer"
         >
           {isEdit ? "Update Recipe" : "Add Recipe"}
         </Button>

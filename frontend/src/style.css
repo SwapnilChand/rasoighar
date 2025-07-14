@@ -1,1 +1,13 @@
 @import "tailwindcss";
+
+@theme {
+  /* --color-*: initial; */
+  --color-brand-bg: #f8f8f8;
+  --color-brand-surface: #ffffff;
+  --color-brand-primary: #4caf50;
+  --color-brand-secondary: #ff9800;
+  --color-brand-text: #212121;
+  --color-brand-subtle: #757575;
+  --font-sans: Inter, sans-serif;
+  --font-serif: Georgia, serif;
+}
