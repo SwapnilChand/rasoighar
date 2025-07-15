@@ -66,7 +66,7 @@ export default function Home() {
   // FETCH all recipes on mount
   const fetchRecipes = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/recipes", {
+      const res = await axios.get(`${API_BASE}/recipes`, {
         headers: { "Content-Type": "application/json" },
       });
       setRecipes(res.data);
@@ -133,9 +133,9 @@ export default function Home() {
       if (searchQuery.trim() !== "") {
         const fetchSearchResults = async () => {
           try {
-            const res = await axios.get(
-              `${API_BASE}/recipes/search/${searchQuery}`
-            );
+            const res = await axios.get(`${API_BASE}/recipes`, {
+              params: { q: searchQuery },
+            });
             setRecipes(res.data);
           } catch (err) {
             console.error("Error while searching for {searchQuery}", err);

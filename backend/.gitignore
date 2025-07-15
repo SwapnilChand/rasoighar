@@ -1,3 +1,10 @@
+# Specific files
+
+backend_in_sqlite.py
+recipes.sql
+db.py
+
+
 # Python
 __pycache__/
 *.py[cod]

@@ -1,7 +1,6 @@
 @import "tailwindcss";
 
 @theme {
-  /* --color-*: initial; */
   --color-brand-bg: #f8f8f8;
   --color-brand-surface: #ffffff;
   --color-brand-primary: #4caf50;

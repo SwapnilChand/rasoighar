@@ -1,134 +1,123 @@
-import sqlite3, os
-from typing import Optional, List, Annotated
-from pydantic import BaseModel, StringConstraints, Field
-from fastapi import FastAPI, File, Form, UploadFile, HTTPException
-from fastapi.staticfiles import StaticFiles
+import asyncio
+import os
+import cloudinary
+from typing import List, Optional
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, model_validator
+from databases import Database
+from dotenv import load_dotenv
 
-app = FastAPI()
+# config
+load_dotenv()
 
-# CORS
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL environment variable is not set.")
+
+database = Database(DATABASE_URL)
+
+cloudinary.config(
+  cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME"),
+  api_key = os.getenv("CLOUDINARY_API_KEY"),
+  api_secret = os.getenv("CLOUDINARY_API_SECRET"),
+  secure=True
+)
+
+# lifespan
+@asynccontextmanager
+async def lifespan(app:FastAPI):
+    print("lifespan startup event")
+    await database.connect()
+
+    create_table_query = """
+        CREATE TABLE IF NOT EXISTS recipes(
+            id SERIAL PRIMARY KEY, 
+            title TEXT NOT NULL,
+            ingredients TEXT NOT NULL,
+            steps TEXT NOT NULL,
+            category TEXT NOT NULL,
+            image_url TEXT,
+            is_tried INTEGER DEFAULT 0
+        );
+    """
+    await database.execute(query=create_table_query)
+
+    yield
+    print("Lifespan shutdown event. Disconnecting from database.")
+    await database.disconnect()
+
+# initialize app instance
+app = FastAPI(lifespan=lifespan)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],     
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Pydantic Models
-class Recipe(BaseModel):
-    title: Annotated[str, StringConstraints(min_length=1, strip_whitespace=True)]
-    ingredients: Annotated[List[str], StringConstraints(min_length=1)]
-    steps: Annotated[str, StringConstraints(min_length=1, strip_whitespace=True)]
-    category: Annotated[List[str], StringConstraints(min_length=1)]
-    image_url: Optional[str] = None
-    is_tried: Annotated[int, Field(ge=0, le=1)] = 0
-
-
-class RecipeOut(Recipe):
+# pydantic model
+class RecipeFromDB(BaseModel):
     id: int
+    title: str
+    ingredients: str  
+    steps: str
+    category: str
+    image_url: Optional[str] = None
+    is_tried: int
+
+class RecipeOut(BaseModel):
+    id: int
+    title: str
+    ingredients: List[str]
+    steps: str
+    category: List[str]
+    image_url: Optional[str] = None
+    is_tried: int
+    @model_validator(mode='before')
+    @classmethod
+    def split_strings(cls, data):
+
+        mutable_data = dict(data)
+
+        ingredients_val = mutable_data.get('ingredients')
+        category_val = mutable_data.get('ingredients')
+
+
+        if isinstance(ingredients_val, str):
+            mutable_data['ingredients'] = [s.strip() for s in ingredients_val.split(",")]
+        if isinstance(category_val, str):
+            mutable_data['category'] = [s.strip() for s in category_val.split(",")]
+        return mutable_data
 
 class MessageResponse(BaseModel):
     msg: str
     image_url: Optional[str] = None
 
-# Utility Function
-db = "recipes.db"
-
-def get_db_connection():
-    conn = sqlite3.connect(db)
-    conn.row_factory = sqlite3.Row
-    return conn
-
-# Endpoints
-
-@app.get("/recipes/{id}", response_model=RecipeOut)
-def get_recipe_by_id(id: int):
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM recipes WHERE id = ?", (id,))
-        row = cursor.fetchone()
-        if not row:
-            raise HTTPException(status_code=404, detail="Recipe not found")
-        return {
-            **dict(row),
-            "category": row["category"].split(","),
-            "ingredients": row["ingredients"].split(",")
-        }
-
+# endpoints
 @app.get("/recipes", response_model=List[RecipeOut])
-def get_all_recipes():
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM recipes")
-        rows = cursor.fetchall()
+async def read_recipes(q: Optional[str] = None):
+    
+        if q:
+            try:     
+                query = "SELECT * FROM recipes WHERE title ILIKE :search_term OR ingredients ILIKE :search_term"
+                values = {"search_term": f"%{q}%"}
+                db_rows = await database.fetch_all(query=query, values=values)
+            except Exception as e:
+                raise HTTPException(500, detail=f"Search failed {e}")
+    
+        else:
+            try:
+                query = "SELECT * FROM recipes ORDER BY id DESC"
+                db_rows = await database.fetch_all(query=query)
+            except Exception as e:
+                raise HTTPException(500, detail=f"Database fetch failed {e}")
 
-        return [
-            {
-                **dict(row),
-                "category": row["category"].split(","),
-                "ingredients": row["ingredients"].split(",")
-            }
-            for row in rows
-        ]
-
-@app.get("/recipes/category/{category}", response_model=List[RecipeOut])
-def get_recipes_by_category(category: str):
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM recipes WHERE category LIKE ?", (f"{category}",))
-        rows = cursor.fetchall()
-
-        return [
-            {
-                **dict(row),
-                "category": row["category"].split(","),
-                "ingredients": row["ingredients"].split(",")
-            }
-            for row in rows
-        ]
-
-@app.get("/tried-recipes", response_model=List[RecipeOut])
-def get_tried_recipes():
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM recipes WHERE is_tried = 1")
-        rows = cursor.fetchall()
-
-        return [
-            {
-                **dict(row),
-                "category": row["category"].split(","),
-                "ingredients": row["ingredients"].split(",")
-            }
-            for row in rows
-        ]
-
-@app.get("/recipes/search/{q}", response_model=List[RecipeOut])
-def search_recipes(q: Optional[str]):
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        like_query = f"%{q}%"
-        cursor.execute("SELECT * FROM recipes WHERE title LIKE ? OR ingredients LIKE ?", (like_query, like_query))
-        rows = cursor.fetchall()
-
-        return [
-            {
-                **dict(row),
-                "category": row["category"].split(","),
-                "ingredients": row["ingredients"].split(",")
-            }
-            for row in rows
-        ]
-
-@app.post("/add-sample-recipe", response_model=MessageResponse)
-def add_sample_recipe():
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO recipes (title, ingredients, steps, category) VALUES (?, ?, ?, ?)", ("Omlette", "Eggs, onions", "Mix & cook", "non-veg"))
-        conn.commit()
-        return {"msg": "Recipe added"}
+        return db_rows
+    
 
 @app.post("/add-recipe", response_model=MessageResponse)
 async def add_recipe(
@@ -139,108 +128,80 @@ async def add_recipe(
     is_tried: int = Form(0),
     image: UploadFile = File(None)):
 
-    # image handling
     image_url = None
     if image:
         try:
-            upload_dir = "uploads"
-            os.makedirs(upload_dir, exist_ok=True)
-            image_path = os.path.join(upload_dir, image.filename)
-            with open(image_path, "wb") as f:
-                f.write(await image.read())
-            image_url = f"/uploads/{image.filename}"
+            loop = asyncio.get_event_loop()
+            upload_result = await loop.run_in_executor(None, lambda: cloudinary.uploader.upload(image.file, folder="rasoighar-uploads"))
+            image_url = upload_result.get("secure_url")
         except Exception as e:
-            raise HTTPException(status_code=500, detail="Image upload failed")
-
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO recipes (title, ingredients, steps, category, image_url, is_tried) VALUES (?, ?, ?, ?, ?, ?)",(title, ingredients, steps, category, image_url, is_tried))
-        conn.commit()
+            raise HTTPException(status_code=500, detail=f"Image upload to cloud failed: {e}")
+        
+    query = "INSERT INTO recipes (title, ingredients, steps, category, image_url, is_tried) VALUES (:title, :ingredients, :steps, :category, :image_url, :is_tried)"
+    values = { 
+        "title": title,
+        "ingredients": ingredients,
+        "steps": steps,
+        "category": category,
+        "is_tried": is_tried,
+        "image_url": image_url}
+    try:
+        await database.execute(query=query, values=values)
         return {"msg": "Recipe added", "image_url": image_url}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database insertion failed: {e}")
+    
+@app.delete("/recipes/{id}", response_model=MessageResponse)
+async def delete_recipe(id: int):
+    query = "SELECT * FROM recipes WHERE id = :id"
+    recipe_exists = await database.fetch_one(query=query, values={"id": id})
+    if not recipe_exists:
+        raise HTTPException(status_code=404, detail=f"Recipe with {id} not found")
+    
+    delete_query = "DELETE FROM recipes WHERE id = :id"
+    await database.execute(query=delete_query, values={"id":id})
+    return {"msg": f"Recipe with id {id} successfully deleted"}
 
-@app.post("/recipes/{id}/mark-tried", response_model=MessageResponse)
-def mark_as_tried(id: int):
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute("UPDATE recipes SET is_tried = 1 WHERE id = ?", (id,))
-        conn.commit()
-        if cursor.rowcount == 0:
-            raise HTTPException(status_code=404, detail="Recipe not found")
-        return {"msg": "Recipe marked as tried"}
-
-@app.patch("/recipes/{id}", response_model=RecipeOut)
-async def update_recipe(
-    id: int,
+@app.patch("/recipes/{id}", response_model=MessageResponse)
+async def edit_recipe(
+    id: int, 
     title: Optional[str] = Form(None),
     ingredients: Optional[str] = Form(None),
     steps: Optional[str] = Form(None),
     category: Optional[str] = Form(None),
     is_tried: Optional[int] = Form(None),
-    image: UploadFile = File(None)):
+    image: Optional[UploadFile] = Form(None)):
 
     updates = {}
     if title: updates["title"] = title
     if ingredients: updates["ingredients"] = ingredients
     if steps: updates["steps"] = steps
     if category: updates["category"] = category
-    if is_tried is not None: updates["is_tried"] = is_tried
+    if is_tried: updates["is_tried"] = is_tried
+    
+    if image:
+        try: 
+            loop = asyncio.get_event_loop()
+            upload_result = await loop.run_in_executor(None, lambda: cloudinary.uploader.upload(image.file, folder="rasoighar-uploads"))
+            updates["image_url"] = upload_result.get("secure_url")
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Adding new image failed: {e}")
+    
+    if not updates:
+        raise HTTPException(status_code=400, detail="No update data provided.")
+    
+    try:
+        set_parts = [f"{key} = :{key}" for key in updates.keys()]
+        set_clause = ", ".join(set_parts)
+        query = f"UPDATE recipes SET {set_clause} WHERE id = :id RETURNING *"
+        values_for_query = updates.copy()
+        values_for_query["id"] = id
 
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM recipes WHERE id = ?", (id,))
-        row = cursor.fetchone()
+        row = await database.fetch_one(query=query, values=values_for_query)
         if not row:
-            raise HTTPException(status_code=404, detail="Recipe not found")
+            raise HTTPException(status_code=404, detail="Recipe not found after update.")
 
-        image_url = row["image_url"]
-        if image:
-            try:
-                upload_dir = "uploads"
-                os.makedirs(upload_dir, exist_ok=True)
-                image_path = os.path.join(upload_dir, image.filename)
-                with open(image_path, "wb") as f:
-                    f.write(await image.read())
-                image_url = f"/uploads/{image.filename}"
-                updates["image_url"] = image_url
-            except:
-                raise HTTPException(status_code=500, detail="Image update failed")
-
-        if not updates:
-            return dict(row)
-
-        set_clause = ",".join([f"{k} = ?" for k in updates.keys()])
-        values = list(updates.values()) + [id]
-        query = f"UPDATE recipes SET {set_clause} WHERE id = ? RETURNING *"
-        cursor.execute(query, tuple(values))
-        updated_row = cursor.fetchone()
-        conn.commit()
-
-        if not updated_row:
-            raise HTTPException(status_code=404, detail="Recipe not found during update.")
-        
-        # Return updated row
-        return {
-                **dict(updated_row),
-                "category": updated_row["category"].split(","),
-                "ingredients": updated_row["ingredients"].split(","),
-            }
-
-@app.delete("/recipes/{id}", response_model=MessageResponse)
-def delete_recipe(id: int):
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM recipes WHERE id = ?", (id,))
-        row = cursor.fetchone()
-        if not row:
-            raise HTTPException(status_code=404, detail="Recipe not found")
-
-        image_url = row["image_url"]
-        if image_url and os.path.exists(image_url):
-            os.remove(image_url)
-
-        cursor.execute("DELETE FROM recipes WHERE id = ?", (id,))
-        conn.commit()
-        return {"msg": f"Recipe deleted with id: {id}"}
-
-# Serve images
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failure in updating recipe with id: {id}, error : {e}")
+    
+    return row
