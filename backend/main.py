@@ -98,6 +98,10 @@ class MessageResponse(BaseModel):
     image_url: Optional[str] = None
 
 # endpoints
+@app.get("/")
+def health_check():
+    return {"status": "ok", "message": "RasoiGhar API is healthy!"}
+
 @app.get("/recipes", response_model=List[RecipeOut])
 async def read_recipes(q: Optional[str] = None):
     
