@@ -95,12 +95,16 @@ def health_check():
     return {"status": "ok", "message": "RasoiGhar API is healthy!"}
 
 @app.get("/recipes", response_model=List[RecipeOut])
-async def read_recipes(q: Optional[str] = None):
+async def read_recipes(q: Optional[str] = None, category: Optional[str] = None):
     try:
         if q:
             query = "SELECT * FROM recipes WHERE title ILIKE :search_term OR ingredients ILIKE :search_term"
             values = {"search_term": f"%{q}%"}
             db_rows = await database.fetch_all(query=query, values=values)
+        if category:
+            query = "SELECT * FROM recipes WHERE category = :category"
+            values = {":category" : category}
+            db_rows = await database.fetch_all(query=query, values=values) 
         else:
             query = "SELECT * FROM recipes ORDER BY id DESC"
             db_rows = await database.fetch_all(query=query)

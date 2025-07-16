@@ -157,7 +157,11 @@ export default function Home() {
     if (category) {
       setActiveCategory(category);
       try {
-        const res = await axios.get(`${API_BASE}/recipes/category/${category}`);
+        const res = await axios.get(`${API_BASE}/recipes/`, {
+          params: {
+            category: category,
+          },
+        });
         setRecipes(res.data);
       } catch (err) {
         console.log("Error applying category filter", err);
